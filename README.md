@@ -5,7 +5,7 @@ scan any url you want for viruses
 
 Sign up an make an account on https://www.virustotal.com/gui/my-apikey
 
-then replace "YOUR API KEY HERE" with your API key.
+then replace "API KEY HERE" with your API key.
 
 thats it :D
 
