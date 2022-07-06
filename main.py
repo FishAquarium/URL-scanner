@@ -34,3 +34,4 @@ undetected: {report.data["attributes"]["last_analysis_stats"]["undetected"]}
         #pprint(report.data)
     except virustotal_python.VirustotalError as err:
         print(f"Failed to send URL: {url} for analysis and get the report: {err}")
+input()
