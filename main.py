@@ -1,15 +1,36 @@
-import requests
+import virustotal_python
+from pprint import pprint
+from base64 import urlsafe_b64encode
 
-url = "https://www.virustotal.com/api/v3/files"
+url = input("URL: ")
 
-payload = "-----011000010111000001101001--\r\n\r\n"
-headers = {
-    "Accept": "application/json",
-    "Content-Type": "multipart/form-data; boundary=---011000010111000001101001",
-    "x-apikey": "68850b90b2b305705c4f2abc9222a790c1f4395c6d148d51f31a5c7913805808",
-    "File": "/hello.txt"
-}
+with virustotal_python.Virustotal("API KEY HERE") as vtotal:
+    try:
+        resp = vtotal.request("urls", data={"url": url}, method="POST")
+        # Safe encode URL in base64 format
+        # https://developers.virustotal.com/reference/url
+        url_id = urlsafe_b64encode(url.encode()).decode().strip("=")
+        report = vtotal.request(f"urls/{url_id}")
+        print(f"""
+URL: {report.data["attributes"]["url"]}
+Final URL: {report.data["attributes"]["last_final_url"]}
+Thread names: {report.data["attributes"]["threat_names"] if report.data["attributes"]["threat_names"] else "None"}
+Times submitted {report.data["attributes"]["times_submitted"]}
+Response Code: {report.data["attributes"]["last_http_response_code"]}
 
-response = requests.post(url, data=payload, headers=headers)
+Votings:
 
-print(response.text)
+harmless: {report.data["attributes"]["total_votes"]["harmless"]}
+malicious: {report.data["attributes"]["total_votes"]["malicious"]}
+
+Scan:
+
+harmless: {report.data["attributes"]["last_analysis_stats"]["harmless"]}
+malicious: {report.data["attributes"]["last_analysis_stats"]["malicious"]}
+sus: {report.data["attributes"]["last_analysis_stats"]["suspicious"]}
+timeout: {report.data["attributes"]["last_analysis_stats"]["timeout"]}
+undetected: {report.data["attributes"]["last_analysis_stats"]["undetected"]}
+""")
+        #pprint(report.data)
+    except virustotal_python.VirustotalError as err:
+        print(f"Failed to send URL: {url} for analysis and get the report: {err}")
